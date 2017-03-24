@@ -11,6 +11,29 @@ import RNFetchBlob from 'react-native-fetch-blob';
 
 import apiKey from './apiKey';
 
+const getModalMessage = emotion => {
+  switch (emotion) {
+    case 'anger':
+      return 'You look very angry!';    
+    case 'contempt':
+      return 'You look contempted';    
+    case 'disgust':
+      return 'You look very disgusted!';    
+    case 'fear':
+      return 'You look like you just saw a ghost!';    
+    case 'happiness':
+      return 'You are happiest person I know';    
+    case 'neutral':
+      return 'You face is so neutral';    
+    case 'sadness':
+      return 'Cheer up! Don\'t be sad';    
+    case 'surprise':
+      return 'You look suprised';    
+    default:
+      return 'Try to make more expressive look';
+  }
+}
+
 export default class emotions extends Component {
   takePicture() {
     this.camera.capture()
@@ -30,7 +53,7 @@ export default class emotions extends Component {
               }
               return acc;
             }, 'anger');
-            Alert.alert(`${strongestEmotion} is the emotion that suits you`)
+            Alert.alert(getModalMessage(strongestEmotion))
           }
         })
         .catch(error => {
