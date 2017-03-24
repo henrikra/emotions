@@ -20,14 +20,18 @@ export default class emotions extends Component {
           'Content-Type': 'application/octet-stream',
         }, data)
         .then(response => {
-          const emotions = JSON.parse(response.data)[0].scores;
-          const strongestEmotion = Object.keys(emotions).reduce((acc, emotion) => {
-            if (emotions[emotion] > emotions[acc]) {
-              return emotion;
-            }
-            return acc;
-          }, 'anger');
-          Alert.alert(`Your strongest is ${strongestEmotion}`)
+          const faces = JSON.parse(response.data);
+
+          if (faces.length) {
+            const emotions = faces[0].scores;
+            const strongestEmotion = Object.keys(emotions).reduce((acc, emotion) => {
+              if (emotions[emotion] > emotions[acc]) {
+                return emotion;
+              }
+              return acc;
+            }, 'anger');
+            Alert.alert(`${strongestEmotion} is the emotion that suits you`)
+          }
         })
         .catch(error => {
           console.log('error', error);
