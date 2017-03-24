@@ -5,6 +5,7 @@ import {
   Text,
   View,
   Alert,
+  Animated,
 } from 'react-native';
 import Camera from 'react-native-camera';
 import RNFetchBlob from 'react-native-fetch-blob';
@@ -47,6 +48,7 @@ export default class App extends Component {
   state = {
     emotion: random(emotions),
     points: 0,
+    pointScale: new Animated.Value(0),
   }
 
   takePicture = () => {
@@ -72,6 +74,9 @@ export default class App extends Component {
               this.setState({
                 points: this.state.points + 1,
                 emotion: random(emotions),
+              }, () => {
+                Animated.timing(this.state.pointScale, {toValue: 1})
+                  .start(() => this.state.pointScale.setValue(0));
               });
             }
           }
@@ -93,7 +98,21 @@ export default class App extends Component {
           captureTarget={Camera.constants.CaptureTarget.memory}
           type={Camera.constants.Type.front}
         >
-          <Text style={styles.points}>{this.state.points}</Text>
+          <Animated.Text 
+            style={[
+              styles.points,
+              {
+                transform: [{
+                  scale: this.state.pointScale.interpolate({
+                    inputRange: [0, 0.5, 1],
+                    outputRange: [1, 2, 1]
+                  }),
+                }]
+              }
+            ]}
+          >
+            {this.state.points}
+          </Animated.Text>
           <Text style={styles.mission}>Next emotion: {this.state.emotion}</Text>
           <Text style={styles.capture} onPress={this.takePicture}>[CAPTURE]</Text>
         </Camera>
