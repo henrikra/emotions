@@ -34,7 +34,21 @@ const getModalMessage = emotion => {
   }
 }
 
-export default class emotions extends Component {
+const random = array => array[Math.floor(Math.random() * array.length)];
+
+const emotions = [
+  'anger',
+  'happiness',
+  'neutral',
+  'surprise',
+];
+
+export default class App extends Component {
+  state = {
+    emotion: random(emotions),
+    points: 0,
+  }
+
   takePicture = () => {
     this.camera.capture()
       .then(({data}) => {
@@ -46,14 +60,20 @@ export default class emotions extends Component {
           const faces = JSON.parse(response.data);
 
           if (faces.length) {
-            const emotions = faces[0].scores;
-            const strongestEmotion = Object.keys(emotions).reduce((acc, emotion) => {
-              if (emotions[emotion] > emotions[acc]) {
+            const playerEmotions = faces[0].scores;
+            const strongestEmotion = Object.keys(playerEmotions).reduce((acc, emotion) => {
+              if (playerEmotions[emotion] > playerEmotions[acc]) {
                 return emotion;
               }
               return acc;
             }, 'anger');
-            Alert.alert(getModalMessage(strongestEmotion))
+
+            if (strongestEmotion === this.state.emotion) {
+              this.setState({
+                points: this.state.points + 1,
+                emotion: random(emotions),
+              });
+            }
           }
         })
         .catch(error => {
@@ -73,6 +93,8 @@ export default class emotions extends Component {
           captureTarget={Camera.constants.CaptureTarget.memory}
           type={Camera.constants.Type.front}
         >
+          <Text style={styles.points}>{this.state.points}</Text>
+          <Text style={styles.mission}>Next emotion: {this.state.emotion}</Text>
           <Text style={styles.capture} onPress={this.takePicture}>[CAPTURE]</Text>
         </Camera>
       </View>
@@ -93,7 +115,18 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     padding: 10,
     margin: 40
+  },
+  mission: {
+    backgroundColor: 'transparent',
+    color: '#ffffff',
+    fontSize: 24,
+  },
+  points: {
+    backgroundColor: 'transparent',
+    color: '#ffffff',
+    fontSize: 32,
+    marginBottom: 15,
   }
 });
 
-AppRegistry.registerComponent('emotions', () => emotions);
+AppRegistry.registerComponent('emotions', () => App);
