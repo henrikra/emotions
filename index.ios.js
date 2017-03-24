@@ -3,7 +3,8 @@ import {
   AppRegistry,
   StyleSheet,
   Text,
-  View
+  View,
+  Alert,
 } from 'react-native';
 import Camera from 'react-native-camera';
 import RNFetchBlob from 'react-native-fetch-blob';
@@ -19,7 +20,14 @@ export default class emotions extends Component {
           'Content-Type': 'application/octet-stream',
         }, data)
         .then(response => {
-          console.log('response', JSON.parse(response.data));
+          const emotions = JSON.parse(response.data)[0].scores;
+          const strongestEmotion = Object.keys(emotions).reduce((acc, emotion) => {
+            if (emotions[emotion] > emotions[acc]) {
+              return emotion;
+            }
+            return acc;
+          }, 'anger');
+          Alert.alert(`Your strongest is ${strongestEmotion}`)
         })
         .catch(error => {
           console.log('error', error);
