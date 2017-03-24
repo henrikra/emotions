@@ -76,7 +76,7 @@ export default class App extends Component {
                 points: this.state.points + 1,
                 emotion: random(emotions),
               }, () => {
-                Animated.timing(this.state.pointScale, {toValue: 1})
+                Animated.spring(this.state.pointScale, {toValue: 1})
                   .start(() => this.state.pointScale.setValue(0));
               });
             }
