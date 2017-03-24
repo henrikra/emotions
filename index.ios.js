@@ -6,6 +6,7 @@ import {
   View,
   Alert,
   Animated,
+  TouchableOpacity,
 } from 'react-native';
 import Camera from 'react-native-camera';
 import RNFetchBlob from 'react-native-fetch-blob';
@@ -114,7 +115,7 @@ export default class App extends Component {
             {this.state.points}
           </Animated.Text>
           <Text style={styles.mission}>Next emotion: {this.state.emotion}</Text>
-          <Text style={styles.capture} onPress={this.takePicture}>[CAPTURE]</Text>
+          <TouchableOpacity style={styles.capture} onPress={this.takePicture} />
         </Camera>
       </View>
     );
@@ -131,9 +132,14 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   capture: {
-    backgroundColor: '#fff',
-    padding: 10,
-    margin: 40
+    backgroundColor: 'transparent',
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    borderWidth: 4,
+    borderColor: '#ffffff',
+    marginTop: 30,
+    marginBottom: 40,
   },
   mission: {
     backgroundColor: 'transparent',
