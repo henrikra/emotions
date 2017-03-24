@@ -35,7 +35,7 @@ const getModalMessage = emotion => {
 }
 
 export default class emotions extends Component {
-  takePicture() {
+  takePicture = () => {
     this.camera.capture()
       .then(({data}) => {
         RNFetchBlob.fetch('POST', 'https://westus.api.cognitive.microsoft.com/emotion/v1.0/recognize', {
@@ -73,7 +73,7 @@ export default class emotions extends Component {
           captureTarget={Camera.constants.CaptureTarget.memory}
           type={Camera.constants.Type.front}
         >
-          <Text style={styles.capture} onPress={this.takePicture.bind(this)}>[CAPTURE]</Text>
+          <Text style={styles.capture} onPress={this.takePicture}>[CAPTURE]</Text>
         </Camera>
       </View>
     );
