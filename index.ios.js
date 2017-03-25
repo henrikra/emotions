@@ -54,9 +54,8 @@ export default class App extends Component {
     this.camera.capture()
       .then(({data}) => {
         api.analyzeEmotions(data)
-        .then(response => {
+        .then(faces => {
           this.setState({isLoading: false});
-          const faces = JSON.parse(response.data);
 
           if (faces.length) {
             const playerEmotions = faces[0].scores;
