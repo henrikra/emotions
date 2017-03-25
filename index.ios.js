@@ -118,9 +118,9 @@ export default class App extends Component {
               return acc;
             }, 'anger');
 
-            const hasMatchingEmoji = this.state.emojis.some(emoji => {
-              return emoji.emotion === strongestEmotion;
-            });
+            const hasMatchingEmoji = this.state.emojis.some(emoji =>
+              emoji.emotion === strongestEmotion
+            );
 
             if (hasMatchingEmoji) {
               this.state.emojiPosition.stopAnimation(() => {
