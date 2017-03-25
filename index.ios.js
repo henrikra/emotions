@@ -7,9 +7,11 @@ import {
   Alert,
   Animated,
   TouchableOpacity,
+  Dimensions,
 } from 'react-native';
 import Camera from 'react-native-camera';
 import RNFetchBlob from 'react-native-fetch-blob';
+import emoji from 'node-emoji';
 
 import apiKey from './apiKey';
 
@@ -37,6 +39,7 @@ const getModalMessage = emotion => {
 }
 
 const random = array => array[Math.floor(Math.random() * array.length)];
+const randomIntegerBetween = (from, to) => Math.floor(Math.random() * to) + from;
 
 const emotions = [
   'anger',
@@ -45,12 +48,20 @@ const emotions = [
   'surprise',
 ];
 
+const {width: deviceWidth, height: deviceHeight} = Dimensions.get('window');
+
 export default class App extends Component {
   state = {
     emotion: random(emotions),
     points: 0,
     pointScale: new Animated.Value(0),
+    emojiPosition: new Animated.Value(0),
   }
+
+  componentDidMount() {
+    Animated.timing(this.state.emojiPosition, {toValue: 1, duration: 20000}).start();
+  }
+  
 
   takePicture = () => {
     this.camera.capture()
@@ -101,21 +112,57 @@ export default class App extends Component {
         >
           <Animated.Text 
             style={[
-              styles.points,
+              styles.emoji,
               {
-                transform: [{
-                  scale: this.state.pointScale.interpolate({
-                    inputRange: [0, 0.5, 1],
-                    outputRange: [1, 2, 1]
-                  }),
-                }]
+                transform: [
+                  {
+                    translateX: this.state.emojiPosition.interpolate({
+                      inputRange: [0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1],
+                      outputRange: [
+                        randomIntegerBetween(0, deviceWidth - 50), 
+                        randomIntegerBetween(0, deviceWidth - 50), 
+                        randomIntegerBetween(0, deviceWidth - 50),
+                        randomIntegerBetween(0, deviceWidth - 50),
+                        randomIntegerBetween(0, deviceWidth - 50),
+                        randomIntegerBetween(0, deviceWidth - 50),
+                        randomIntegerBetween(0, deviceWidth - 50),
+                        randomIntegerBetween(0, deviceWidth - 50),
+                        randomIntegerBetween(0, deviceWidth - 50),
+                        randomIntegerBetween(0, deviceWidth - 50),
+                        randomIntegerBetween(0, deviceWidth - 50),
+                        ],
+                    })
+                  }, 
+                  {
+                    translateY: this.state.emojiPosition.interpolate({
+                      inputRange: [0, 1],
+                      outputRange: [0, deviceHeight - 50],
+                    })
+                  }
+                ]
               }
-            ]}
-          >
-            {this.state.points}
+            ]}>
+            {emoji.get('open_mouth')}
           </Animated.Text>
-          <Text style={styles.mission}>Next emotion: {this.state.emotion}</Text>
-          <TouchableOpacity style={styles.capture} onPress={this.takePicture} />
+          <View style={styles.actions}>
+            <Animated.Text 
+              style={[
+                styles.points,
+                {
+                  transform: [{
+                    scale: this.state.pointScale.interpolate({
+                      inputRange: [0, 0.5, 1],
+                      outputRange: [1, 2, 1]
+                    }),
+                  }]
+                }
+              ]}
+            >
+              {this.state.points}
+            </Animated.Text>
+            <Text style={styles.mission}>Next emotion: {this.state.emotion}</Text>
+            <TouchableOpacity style={styles.capture} onPress={this.takePicture} />
+          </View>
         </Camera>
       </View>
     );
@@ -128,7 +175,9 @@ const styles = StyleSheet.create({
   },
   preview: {
     flex: 1,
-    justifyContent: 'flex-end',
+    justifyContent: 'space-between',
+  },
+  actions: {
     alignItems: 'center',
   },
   capture: {
@@ -151,7 +200,11 @@ const styles = StyleSheet.create({
     color: '#ffffff',
     fontSize: 32,
     marginBottom: 15,
-  }
+  },
+  emoji: {
+    backgroundColor: 'transparent',
+    fontSize: 60,
+  },
 });
 
 AppRegistry.registerComponent('emotions', () => App);
