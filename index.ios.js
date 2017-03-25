@@ -59,12 +59,7 @@ export default class App extends Component {
 
           if (faces.length) {
             const playerEmotions = faces[0].scores;
-            const strongestEmotion = Object.keys(playerEmotions).reduce((acc, emotion) => {
-              if (playerEmotions[emotion] > playerEmotions[acc]) {
-                return emotion;
-              }
-              return acc;
-            }, 'anger');
+            const strongestEmotion = utils.strongestEmotion(playerEmotions);
 
             const hasMatchingEmoji = this.state.emojis.some(emoji =>
               emoji.emotion === strongestEmotion

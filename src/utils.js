@@ -45,3 +45,10 @@ export const getMatchingEmoji = emotion => {
 
 export const random = array => array[Math.floor(Math.random() * array.length)];
 export const randomIntegerBetween = (from, to) => Math.floor(Math.random() * to) + from;
+
+export const strongestEmotion = playerEmotions => Object.keys(playerEmotions).reduce((acc, emotion) => {
+  if (playerEmotions[emotion] > playerEmotions[acc]) {
+    return emotion;
+  }
+  return acc;
+}, 'anger');
