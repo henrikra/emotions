@@ -11,7 +11,7 @@ import {
 } from 'react-native';
 import Camera from 'react-native-camera';
 import RNFetchBlob from 'react-native-fetch-blob';
-import emoji from 'node-emoji';
+import nodeEmoji from 'node-emoji';
 
 import apiKey from './apiKey';
 
@@ -37,6 +37,28 @@ const getModalMessage = emotion => {
       return 'Try to make more expressive look';
   }
 }
+const getMatchingEmoji = emotion => {
+  switch (emotion) {
+    case 'anger':
+      return 'angry';    
+    case 'contempt':
+      return 'triumph';    
+    case 'disgust':
+      return 'persevere';    
+    case 'fear':
+      return 'cold_sweat';    
+    case 'happiness':
+      return 'blush';    
+    case 'neutral':
+      return 'neutral_face';    
+    case 'sadness':
+      return 'sob';    
+    case 'surprise':
+      return 'open_mouth';    
+    default:
+      return 'no_mouth';
+  }
+}
 
 const random = array => array[Math.floor(Math.random() * array.length)];
 const randomIntegerBetween = (from, to) => Math.floor(Math.random() * to) + from;
@@ -52,10 +74,12 @@ const {width: deviceWidth, height: deviceHeight} = Dimensions.get('window');
 
 export default class App extends Component {
   state = {
-    emotion: random(emotions),
     points: 0,
     pointScale: new Animated.Value(0),
     emojiPosition: new Animated.Value(0),
+    emojis: [{
+      emotion: random(emotions), position: new Animated.Value(0),
+    }]
   }
 
   componentDidMount() {
@@ -82,10 +106,18 @@ export default class App extends Component {
               return acc;
             }, 'anger');
 
-            if (strongestEmotion === this.state.emotion) {
+            const hasMatchingEmoji = this.state.emojis.some(emoji => {
+              return emoji.emotion === strongestEmotion;
+            });
+
+            if (hasMatchingEmoji) {
+              this.state.emojiPosition.stopAnimation(() => {
+                this.state.emojiPosition.setValue(-0.05);
+                Animated.timing(this.state.emojiPosition, {toValue: 1, duration: 20000}).start();
+              });
               this.setState({
                 points: this.state.points + 1,
-                emotion: random(emotions),
+                emojis: [{emotion: random(emotions), position: new Animated.Value(0)}],
               }, () => {
                 Animated.spring(this.state.pointScale, {toValue: 1})
                   .start(() => this.state.pointScale.setValue(0));
@@ -110,40 +142,45 @@ export default class App extends Component {
           captureTarget={Camera.constants.CaptureTarget.memory}
           type={Camera.constants.Type.front}
         >
-          <Animated.Text 
-            style={[
-              styles.emoji,
-              {
-                transform: [
+          {this.state.emojis.map((emoji, index) => {
+            return (
+              <Animated.Text 
+                key={index}
+                style={[
+                  styles.emoji,
                   {
-                    translateX: this.state.emojiPosition.interpolate({
-                      inputRange: [0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1],
-                      outputRange: [
-                        randomIntegerBetween(0, deviceWidth - 50), 
-                        randomIntegerBetween(0, deviceWidth - 50), 
-                        randomIntegerBetween(0, deviceWidth - 50),
-                        randomIntegerBetween(0, deviceWidth - 50),
-                        randomIntegerBetween(0, deviceWidth - 50),
-                        randomIntegerBetween(0, deviceWidth - 50),
-                        randomIntegerBetween(0, deviceWidth - 50),
-                        randomIntegerBetween(0, deviceWidth - 50),
-                        randomIntegerBetween(0, deviceWidth - 50),
-                        randomIntegerBetween(0, deviceWidth - 50),
-                        randomIntegerBetween(0, deviceWidth - 50),
-                        ],
-                    })
-                  }, 
-                  {
-                    translateY: this.state.emojiPosition.interpolate({
-                      inputRange: [0, 1],
-                      outputRange: [0, deviceHeight - 50],
-                    })
+                    transform: [
+                      {
+                        translateX: this.state.emojiPosition.interpolate({
+                          inputRange: [0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1],
+                          outputRange: [
+                            randomIntegerBetween(0, deviceWidth - 50), 
+                            randomIntegerBetween(0, deviceWidth - 50), 
+                            randomIntegerBetween(0, deviceWidth - 50),
+                            randomIntegerBetween(0, deviceWidth - 50),
+                            randomIntegerBetween(0, deviceWidth - 50),
+                            randomIntegerBetween(0, deviceWidth - 50),
+                            randomIntegerBetween(0, deviceWidth - 50),
+                            randomIntegerBetween(0, deviceWidth - 50),
+                            randomIntegerBetween(0, deviceWidth - 50),
+                            randomIntegerBetween(0, deviceWidth - 50),
+                            randomIntegerBetween(0, deviceWidth - 50),
+                          ],
+                        })
+                      }, 
+                      {
+                        translateY: this.state.emojiPosition.interpolate({
+                          inputRange: [0, 1],
+                          outputRange: [0, deviceHeight - 50],
+                        })
+                      }
+                    ]
                   }
-                ]
-              }
-            ]}>
-            {emoji.get('open_mouth')}
-          </Animated.Text>
+                ]}>
+                {nodeEmoji.get(getMatchingEmoji(emoji.emotion))}
+              </Animated.Text>
+            );
+          })}
           <View style={styles.actions}>
             <Animated.Text 
               style={[
@@ -160,7 +197,6 @@ export default class App extends Component {
             >
               {this.state.points}
             </Animated.Text>
-            <Text style={styles.mission}>Next emotion: {this.state.emotion}</Text>
             <TouchableOpacity style={styles.capture} onPress={this.takePicture} />
           </View>
         </Camera>
@@ -189,11 +225,6 @@ const styles = StyleSheet.create({
     borderColor: '#ffffff',
     marginTop: 30,
     marginBottom: 40,
-  },
-  mission: {
-    backgroundColor: 'transparent',
-    color: '#ffffff',
-    fontSize: 24,
   },
   points: {
     backgroundColor: 'transparent',
