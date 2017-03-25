@@ -83,9 +83,12 @@ export default class App extends Component {
   }
 
   componentDidMount() {
-    Animated.timing(this.state.emojiPosition, {toValue: 1, duration: 20000}).start();
+    this.animateEmojiToBottom();
   }
   
+  animateEmojiToBottom = () => {
+    Animated.timing(this.state.emojiPosition, {toValue: 1, duration: 15000}).start();
+  }
 
   takePicture = () => {
     this.camera.capture()
@@ -113,7 +116,7 @@ export default class App extends Component {
             if (hasMatchingEmoji) {
               this.state.emojiPosition.stopAnimation(() => {
                 this.state.emojiPosition.setValue(-0.05);
-                Animated.timing(this.state.emojiPosition, {toValue: 1, duration: 20000}).start();
+                this.animateEmojiToBottom();
               });
               this.setState({
                 points: this.state.points + 1,
