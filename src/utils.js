@@ -31,7 +31,7 @@ export const getMatchingEmoji = emotion => {
     case 'fear':
       return 'cold_sweat';    
     case 'happiness':
-      return 'blush';    
+      return 'grin';    
     case 'neutral':
       return 'neutral_face';    
     case 'sadness':
