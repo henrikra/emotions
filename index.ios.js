@@ -72,14 +72,21 @@ const emotions = [
 
 const {width: deviceWidth, height: deviceHeight} = Dimensions.get('window');
 
+const createEmoji = () => {
+  return {
+    emotion: random(emotions), 
+    position: new Animated.Value(0),
+    xRange: Array.from({length: 11}).map(() => randomIntegerBetween(0, deviceWidth - 50)),
+  };
+};
+
 export default class App extends Component {
   state = {
     points: 0,
     pointScale: new Animated.Value(0),
     emojiPosition: new Animated.Value(0),
-    emojis: [{
-      emotion: random(emotions), position: new Animated.Value(0),
-    }]
+    emojis: [createEmoji()],
+    isLoading: false,
   }
 
   componentDidMount() {
@@ -91,6 +98,7 @@ export default class App extends Component {
   }
 
   takePicture = () => {
+    this.setState({isLoading: true});
     this.camera.capture()
       .then(({data}) => {
         RNFetchBlob.fetch('POST', 'https://westus.api.cognitive.microsoft.com/emotion/v1.0/recognize', {
@@ -98,6 +106,7 @@ export default class App extends Component {
           'Content-Type': 'application/octet-stream',
         }, data)
         .then(response => {
+          this.setState({isLoading: false});
           const faces = JSON.parse(response.data);
 
           if (faces.length) {
@@ -120,7 +129,7 @@ export default class App extends Component {
               });
               this.setState({
                 points: this.state.points + 1,
-                emojis: [{emotion: random(emotions), position: new Animated.Value(0)}],
+                emojis: [createEmoji()],
               }, () => {
                 Animated.spring(this.state.pointScale, {toValue: 1})
                   .start(() => this.state.pointScale.setValue(0));
@@ -156,19 +165,7 @@ export default class App extends Component {
                       {
                         translateX: this.state.emojiPosition.interpolate({
                           inputRange: [0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1],
-                          outputRange: [
-                            randomIntegerBetween(0, deviceWidth - 50), 
-                            randomIntegerBetween(0, deviceWidth - 50), 
-                            randomIntegerBetween(0, deviceWidth - 50),
-                            randomIntegerBetween(0, deviceWidth - 50),
-                            randomIntegerBetween(0, deviceWidth - 50),
-                            randomIntegerBetween(0, deviceWidth - 50),
-                            randomIntegerBetween(0, deviceWidth - 50),
-                            randomIntegerBetween(0, deviceWidth - 50),
-                            randomIntegerBetween(0, deviceWidth - 50),
-                            randomIntegerBetween(0, deviceWidth - 50),
-                            randomIntegerBetween(0, deviceWidth - 50),
-                          ],
+                          outputRange: emoji.xRange,
                         })
                       }, 
                       {
@@ -200,7 +197,11 @@ export default class App extends Component {
             >
               {this.state.points}
             </Animated.Text>
-            <TouchableOpacity style={styles.capture} onPress={this.takePicture} />
+            <TouchableOpacity 
+              style={styles.capture} 
+              onPress={this.takePicture} 
+              disabled={this.state.isLoading} 
+            />
           </View>
         </Camera>
       </View>
