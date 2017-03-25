@@ -10,11 +10,10 @@ import {
   Dimensions,
 } from 'react-native';
 import Camera from 'react-native-camera';
-import RNFetchBlob from 'react-native-fetch-blob';
 import nodeEmoji from 'node-emoji';
 
-import apiKey from './apiKey';
 import * as utils from './src/utils';
+import api from './src/api';
 
 const emotions = [
   'anger',
@@ -54,10 +53,7 @@ export default class App extends Component {
     this.setState({isLoading: true});
     this.camera.capture()
       .then(({data}) => {
-        RNFetchBlob.fetch('POST', 'https://westus.api.cognitive.microsoft.com/emotion/v1.0/recognize', {
-          'Ocp-Apim-Subscription-Key': apiKey,
-          'Content-Type': 'application/octet-stream',
-        }, data)
+        api.analyzeEmotions(data)
         .then(response => {
           this.setState({isLoading: false});
           const faces = JSON.parse(response.data);
